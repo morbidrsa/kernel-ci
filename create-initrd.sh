@@ -113,6 +113,11 @@ else
 fi
 
 if [ x"$KDIR" != "x" ]; then
+	readlink $KDIR
+	LINK=$?
+	if [ $LINK -eq 0 ]; then
+		KDIR="$KDIR/"
+	fi
 	for mod in ${MODULES}; do
 		find $KDIR -name "${mod}" | xargs cp -t lib/modules/
 	done
