@@ -63,6 +63,6 @@ fi
 
 pr_debug "Using JeOS image ${MASTER}"
 pr_debug "Creating initrd"
-create-initrd.sh -k ${KERNELDIR} -m "$MODULES" > /dev/null 
+./create-initrd.sh -k ${KERNELDIR} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
-vm.sh -a ${ARCH} -r ${MASTER} -k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img
+./vm.sh -a ${ARCH} -r ${MASTER} -k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img
