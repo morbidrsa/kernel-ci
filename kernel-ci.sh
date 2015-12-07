@@ -38,7 +38,6 @@ usage()
 
 KERNELDIR=""
 MODULES="virtio.ko virtio_ring.ko virtio_pci.ko virtio_blk.ko raid6_pq.ko xor.ko btrfs.ko"
-#MODULES="virtio.ko virtio_ring.ko virtio_pci.ko virtio_blk.ko scsi_mod.ko sd_mod.ko libata.ko libahci.ko ahci.ko raid6_pq.ko xor.ko btrfs.ko"
 MASTER=""
 ARCH=x86_64
 
