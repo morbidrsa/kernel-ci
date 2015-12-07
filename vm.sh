@@ -1,6 +1,8 @@
 #!/bin/sh
 set -o nounset
 
+source ./lib.sh
+
 QEMU="qemu-system-"
 ARCH="x86_64"
 KERNEL=""
@@ -10,20 +12,13 @@ ROOT="/dev/vda3"
 
 # TODO Add networking
 
-pr_debug()
-{
-	echo "[DEBUG] $@"
-}
-
-pr_info()
-{
-	echo "[INFO] $@"
-}
-
-while getopts "a:k:i:r:hR:" opt; do
+while getopts "da:k:i:r:hR:" opt; do
 	case ${opt} in
 		a)
 			ARCH=$OPTARG
+			;;
+		d)
+			DEBUG=$OPTARG
 			;;
 		k)
 			KERNEL=$OPTARG
@@ -55,17 +50,15 @@ CLI_KERNEL=""
 CLI_INITRD=""
 
 
-if [ "$KERNEL" != "" ]; then
+if [ x"$KERNEL" != "x" ]; then
 	CLI_BOOT="-append 'root=$ROOT ro console=ttyS0 quiet rdinit=/bin/init'"
 	CLI_KERNEL="-kernel $KERNEL"
-	pr_info "Linux kernel to load: $KERNEL"
+	pr_debug "Linux kernel to load: $KERNEL"
 
-	if [ "$INITRD" != "" ]; then
+	if [ x"$INITRD" != "x" ]; then
 		CLI_INITRD="-initrd $INITRD"
-		pr_info "Initramfs to load: $INITRD"
+		pr_debug "Initramfs to load: $INITRD"
 	fi
-else
-	pr_info "[INFO] Use kernel available in the image"
 fi
 
 
@@ -77,5 +70,5 @@ CMD="${QEMU_CMD}	\
 	${CLI_SERIAL}	\
 	${CLI_HDD}"
 
-pr_info $CMD
+pr_debug $CMD
 eval $CMD

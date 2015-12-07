@@ -2,24 +2,7 @@
 
 set -o nounset
 
-DEBUG=0
-
-pr_info()
-{
-	echo "[INFO] $@"
-}
-
-pr_err()
-{
-	echo "[ERROR] $@"
-}
-
-pr_debug()
-{
-	if [ $DEBUG == 1 ]; then
-		echo "[DEBUG] $@"
-	fi
-}
+source ./lib.sh
 
 cleanup() 
 {
