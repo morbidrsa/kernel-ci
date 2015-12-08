@@ -35,7 +35,7 @@ usage()
 }
 
 program=$(basename $0)
-while getopts "k:m:?" flag; do
+while getopts "k:m:r:?" flag; do
 	case ${flag} in
 		k)
 			KDIR=${OPTARG}
