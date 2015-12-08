@@ -1,0 +1,29 @@
+.TH kernel-ci.sh 1
+.SH NAME
+kernel-ci.sh \- boottest the Linux kernel
+.SH SYNOPSIS
+.B kernel-ci [-d] [-a arch] -k <kerneldir> -i <master-image>
+.SH DESCRIPTION
+kernel-ci.sh is a small shell script to create an initrd for a self build
+Linux kernel and boot it together with a rootfs image in qemu.
+
+.SH OPTIONS
+\fB-d\fR Enable debug output.
+
+\fB-a arch\fR The architecture used by Qemu (default x86_64).
+
+\fB-k kerneldir\fR The top level directory that contains your build kernel.
+
+\fB-i master-image\fR The "golden master" of your rootfs image.
+
+.SH EXAMPLE
+
+kernel-ci.sh -k ~/src/kernel-source/tmp/current/ \\
+
+	-i ~/Images/SLES12-JeOS-for-kvm-and-xen.x86_64-GM.qcow2.master
+
+.SH "AUTHOR"
+Initiall written by Johannes Thumshirn for SUSE Linux GmbH.
+
+.SH "LICENSE"
+GPLv2 (see http://www.gnu.org/copyleft/gpl.html)
