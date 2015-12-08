@@ -12,6 +12,18 @@ ROOT="/dev/vda3"
 
 # TODO Add networking
 
+usage()
+{
+	prog=$(basename $0)
+	echo "$prog [-a arch] [-d] [-r rootfs] [-R root] -k <kernel> -i <initrd>" >&2
+	echo "  -a arch         Architecture for QEMU." >&2
+	echo "  -d              Enable debug output." >&2
+	echo "  -r rootfs       Rootfs image to use." >&2
+	echo "  -R root         root= kernel cmdline option" >&2
+	echo "  -k kernel       kernel image to use." >&2
+	echo "  -i initrd       initrd image to use." >&2
+}
+
 while getopts "da:k:i:r:hR:" opt; do
 	case ${opt} in
 		a)
