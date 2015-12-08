@@ -62,17 +62,24 @@ CLI_KERNEL=""
 CLI_INITRD=""
 
 
-if [ x"$KERNEL" != "x" ]; then
-	CLI_BOOT="-append 'root=$ROOT ro console=ttyS0 quiet rdinit=/bin/init'"
-	CLI_KERNEL="-kernel $KERNEL"
-	pr_debug "Linux kernel to load: $KERNEL"
-
-	if [ x"$INITRD" != "x" ]; then
-		CLI_INITRD="-initrd $INITRD"
-		pr_debug "Initramfs to load: $INITRD"
-	fi
+if [ x"$KERNEL" == "x" ]; then
+	pr_err "No kernel option given"
+	usage
+	exit
 fi
 
+CLI_BOOT="-append 'root=$ROOT ro console=ttyS0 quiet rdinit=/bin/init'"
+CLI_KERNEL="-kernel $KERNEL"
+pr_debug "Linux kernel to load: $KERNEL"
+
+if [ x"$INITRD" == "x" ]; then
+	pr_err "No initrd option given"
+	usage
+	exit
+fi
+
+CLI_INITRD="-initrd $INITRD"
+pr_debug "Initramfs to load: $INITRD"
 
 CMD="${QEMU_CMD}	\
 	${CLI_BASE}	\
