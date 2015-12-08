@@ -77,7 +77,7 @@ fi
 QEMU_CMD="$QEMU$ARCH"
 
 QEMU_DEFAULTS="-device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x4 -device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x6"
-QEMU_HDD="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive file=${ROOTFS},if=none,id=drive-virtio-disk0,format=qcow2 -snapshot"
+QEMU_HDD="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive file=${ROOTFS},if=none,id=drive-virtio-disk0 -snapshot"
 QEMU_SERIAL="-serial stdio -monitor none"
 QEMU_BOOT=""
 QEMU_BASE="-nographic"
