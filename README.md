@@ -49,3 +49,16 @@ kernel to boot test.
 ./kernel-ci.sh -k ~/src/kernel-source/tmp/current/ \
 	-i ~/Images/SLES12-JeOS-for-kvm-and-xen.x86_64-GM.qcow2.master
 ```
+
+In the background it calls *create-initrd.sh* to create an initrd for the
+kernel image including the virtio_blk.ko and btrfs.ko drivers as well as their
+dependencies. Once the initrd image is created it copies the rootfs image so
+eventual disk writes or misbehaving drivers won't corrupt it and pass the
+kernel, initrd and the copy of the rootfs to *vm.sh* which spawns qemu to
+boot the kernel.
+
+It is usefull to not only do a bare bone boot of the kernel (which is good for
+basic smoke testing) but run a set of tests (for example the xfstests test
+suite) as well after boot. In order to achive this your rootfs image should
+contain a systemd service or initscript to lunch the tests after successfull
+bootup.
