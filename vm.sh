@@ -1,4 +1,9 @@
 #!/bin/sh
+#
+# Copyright (c) 2015 SUSE Linux GmbH
+#
+# This file is part of the kernel-ci project and licensed under the GNU GPLv2
+#
 set -o nounset
 
 source ./lib.sh
