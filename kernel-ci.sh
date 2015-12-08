@@ -16,7 +16,7 @@ usage()
 	echo "  -a	Set QEMU architecture (default: x86_64)." >&2
 	echo "  -d	Enable debug output." >&2
 	echo "  -k	Directory from where to use the kernel." >&2
-	echo "  -i	HDD image to use."
+	echo "  -i	HDD image to use." >&2
 }
 
 KERNELDIR=""
