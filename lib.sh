@@ -9,7 +9,7 @@ pr_info()
 
 pr_err()
 {
-	echo "[ERROR] $@"
+	echo "[ERROR] $@" >&2
 }
 
 pr_debug()
