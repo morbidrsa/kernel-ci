@@ -56,43 +56,48 @@ while getopts "da:k:i:r:hR:" opt; do
 	esac
 done
 
-QEMU_CMD="$QEMU$ARCH"
-
-CLI_DEFAULTS="-device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x4 -device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x6"
-CLI_HDD="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive file=${ROOTFS},if=none,id=drive-virtio-disk0,format=qcow2 -snapshot"
-CLI_SERIAL="-serial stdio -monitor none"
-CLI_BOOT=""
-CLI_BASE="-nographic"
-CLI_KERNEL=""
-CLI_INITRD=""
-
-
 if [ x"$KERNEL" == "x" ]; then
 	pr_err "No kernel option given"
 	usage
-	exit
+	exit 1
 fi
 
-CLI_BOOT="-append 'root=$ROOT ro console=ttyS0 quiet rdinit=/bin/init'"
-CLI_KERNEL="-kernel $KERNEL"
-pr_debug "Linux kernel to load: $KERNEL"
+if [ x"$ROOTFS" == "x" ]; then
+	pr_err "No rootfs option given"
+	usage
+	exit 1
+fi
 
 if [ x"$INITRD" == "x" ]; then
 	pr_err "No initrd option given"
 	usage
-	exit
+	exit 1
 fi
 
-CLI_INITRD="-initrd $INITRD"
+QEMU_CMD="$QEMU$ARCH"
+
+QEMU_DEFAULTS="-device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x4 -device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x6"
+QEMU_HDD="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive file=${ROOTFS},if=none,id=drive-virtio-disk0,format=qcow2 -snapshot"
+QEMU_SERIAL="-serial stdio -monitor none"
+QEMU_BOOT=""
+QEMU_BASE="-nographic"
+QEMU_KERNEL=""
+QEMU_INITRD=""
+
+QEMU_BOOT="-append 'root=$ROOT ro console=ttyS0 quiet rdinit=/bin/init'"
+QEMU_KERNEL="-kernel $KERNEL"
+pr_debug "Linux kernel to load: $KERNEL"
+
+QEMU_INITRD="-initrd $INITRD"
 pr_debug "Initramfs to load: $INITRD"
 
 CMD="${QEMU_CMD}	\
-	${CLI_BASE}	\
-	${CLI_KERNEL}	\
-	${CLI_INITRD}	\
-	${CLI_BOOT}	\
-	${CLI_SERIAL}	\
-	${CLI_HDD}"
+	${QEMU_BASE}	\
+	${QEMU_KERNEL}	\
+	${QEMU_INITRD}	\
+	${QEMU_BOOT}	\
+	${QEMU_SERIAL}	\
+	${QEMU_HDD}"
 
 pr_debug $CMD
 eval $CMD
