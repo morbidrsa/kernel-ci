@@ -19,3 +19,12 @@ vm.sh [-a arch] [-d] [-r rootfs] [-R root] -k <kernel> -i <initrd>
   -k kernel       kernel image to use.
   -i initrd       initrd image to use.
 ```
+
+## create-initrd.sh
+```
+create-initrd.sh [-k kdir ] [-m '<module[ <module>][...]'] [-r root]
+  -k Directory having the kernel sources.
+  -m Space separated list of kernel modules to include
+     in initrd image.
+  -r root= kernel option (default /dev/vda3).
+```
