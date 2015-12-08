@@ -18,22 +18,24 @@ cleanup()
 
 usage()
 {
-	echo "$(basename $0) [-d] [-a ARCH] -k <kerneldir> -i <master-image>" >&2
+	echo "$(basename $0) [-d] [-a ARCH] -k <kerneldir> -i <master-image> [-r <root>]" >&2
 	echo "  -a	Set QEMU architecture (default: x86_64)." >&2
 	echo "  -d	Enable debug output." >&2
 	echo "  -k	Directory from where to use the kernel." >&2
 	echo "  -i	HDD image to use." >&2
+	echo "  -r      root partition name." >&2
 }
 
 KERNELDIR=""
 MODULES="virtio.ko virtio_ring.ko virtio_pci.ko virtio_blk.ko raid6_pq.ko xor.ko btrfs.ko"
 MASTER=""
 IMAGE=""
+ROOT=
 ARCH=x86_64
 
 trap cleanup EXIT
 
-while getopts "a:dk:i:h?" opt; do
+while getopts "a:dk:i:r:h?" opt; do
 	case ${opt} in
 		a)
 			ARCH=$OPTARG
@@ -46,6 +48,9 @@ while getopts "a:dk:i:h?" opt; do
 			;;
 		i)
 			MASTER=$OPTARG
+			;;
+		r)
+			ROOT=$OPTARG
 			;;
 		h)
 			usage
@@ -72,6 +77,6 @@ IMAGE=$MASTER.$$
 cp ${MASTER} ${IMAGE}
 pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
-./create-initrd.sh -k ${KERNELDIR} -m "$MODULES" > /dev/null
+./create-initrd.sh -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
-./vm.sh -a ${ARCH} -r ${MASTER} -k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img
+./vm.sh -a ${ARCH} -r ${MASTER} ${ROOT:+-R $ROOT} -k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img
