@@ -40,3 +40,12 @@ create-initrd.sh [-k kdir ] [-m '<module[ <module>][...]'] [-r root]
      in initrd image.
   -r root= kernel option (default /dev/vda3).
 ```
+
+## Example usage
+The following example uses a SLES12 JeOS image in conjunction with a new
+kernel to boot test.
+
+```
+./kernel-ci.sh -k ~/src/kernel-source/tmp/current/ \
+	-i ~/Images/SLES12-JeOS-for-kvm-and-xen.x86_64-GM.qcow2.master
+```
