@@ -12,6 +12,7 @@ source ./lib.sh
 cleanup() 
 {
 	pr_debug "Cleaning up"
+	rm -f $IMAGE
 	rm -rf initrd*
 }
 
@@ -27,6 +28,7 @@ usage()
 KERNELDIR=""
 MODULES="virtio.ko virtio_ring.ko virtio_pci.ko virtio_blk.ko raid6_pq.ko xor.ko btrfs.ko"
 MASTER=""
+IMAGE=""
 ARCH=x86_64
 
 trap cleanup EXIT
@@ -66,7 +68,9 @@ if [ x"$MASTER" == "x" ]; then
 	exit 1
 fi
 
-pr_debug "Using JeOS image ${MASTER}"
+IMAGE=$MASTER.$$
+cp ${MASTER} ${IMAGE}
+pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
 ./create-initrd.sh -k ${KERNELDIR} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
