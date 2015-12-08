@@ -1,5 +1,17 @@
 # kernel-ci
-Build an initramdisk for a newly build kernel and run it inside QEMU
+Build an initramdisk for a newly build kernel and run it inside QEMU.
+
+The kernel-ci project consists of a set of shell scripts
+
+* kernel-ci.sh
+* vm.sh
+* create-initrd.sh
+
+which are used to boot-test (and probably run additional tests) a freshly
+built kernel in a sealed environment.
+
+The scripts have beek created as part of the kernel-ci project of SUSE's
+Hackweek Number 13.
 
 ## kernel-ci.sh
 ```
