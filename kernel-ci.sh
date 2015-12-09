@@ -32,10 +32,11 @@ MASTER=""
 IMAGE=""
 ROOT=
 ARCH=x86_64
+TIMEOUT=60
 
 trap cleanup EXIT
 
-while getopts "a:dk:i:r:h?" opt; do
+while getopts "a:dk:i:r:t:h?" opt; do
 	case ${opt} in
 		a)
 			ARCH=$OPTARG
@@ -51,6 +52,9 @@ while getopts "a:dk:i:r:h?" opt; do
 			;;
 		r)
 			ROOT=$OPTARG
+			;;
+		t)
+			TIMEOUT=$OPTARG
 			;;
 		h)
 			usage
@@ -79,4 +83,5 @@ pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
 ./create-initrd.sh -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
-./vm.sh -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} -k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img
+./vm.sh -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} \
+	-k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img -t $TIMEOUT

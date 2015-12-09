@@ -14,6 +14,7 @@ KERNEL=""
 INITRD=""
 ROOTFS=""
 ROOT="/dev/vda3"
+TIMEOUT=""
 
 # TODO Add networking
 
@@ -29,7 +30,7 @@ usage()
 	echo "  -i initrd       initrd image to use." >&2
 }
 
-while getopts "da:k:i:r:hR:" opt; do
+while getopts "da:k:i:r:hR:t:" opt; do
 	case ${opt} in
 		a)
 			ARCH=$OPTARG
@@ -48,6 +49,9 @@ while getopts "da:k:i:r:hR:" opt; do
 			;;
 		R)
 			ROOT=$OPTARG
+			;;
+		t)
+			TIMEOUT=$OPTARG
 			;;
 		h)
 			usage
@@ -84,20 +88,20 @@ QEMU_BASE="-nographic -smp 2 -m 1024"
 QEMU_KERNEL=""
 QEMU_INITRD=""
 
-QEMU_BOOT="-append 'root=$ROOT ro console=ttyS0 quiet rdinit=/bin/init'"
+QEMU_BOOT="-append 'root=${ROOT} ro console=ttyS0 quiet rdinit=/bin/init'"
 QEMU_KERNEL="-kernel $KERNEL"
 pr_debug "Linux kernel to load: $KERNEL"
 
 QEMU_INITRD="-initrd $INITRD"
 pr_debug "Initramfs to load: $INITRD"
 
-CMD="${QEMU_CMD}	\
-	${QEMU_BASE}	\
+CMD=(${QEMU_CMD}		\
+	${QEMU_BASE}		\
 	${QEMU_KERNEL}	\
 	${QEMU_INITRD}	\
-	${QEMU_BOOT}	\
+	"${QEMU_BOOT}"		\
 	${QEMU_SERIAL}	\
-	${QEMU_HDD}"
+	${QEMU_HDD})
 
-pr_debug $CMD
-eval $CMD
+pr_debug "$CMD"
+timeout --foreground --kill-after=10 "$TIMEOUT" "${CMD[@]}"
