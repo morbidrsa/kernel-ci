@@ -80,7 +80,7 @@ QEMU_DEFAULTS="-device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x4 -d
 QEMU_HDD="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive file=${ROOTFS},if=none,id=drive-virtio-disk0 -snapshot"
 QEMU_SERIAL="-serial stdio -monitor none"
 QEMU_BOOT=""
-QEMU_BASE="-nographic"
+QEMU_BASE="-nographic -smp 2 -m 1024"
 QEMU_KERNEL=""
 QEMU_INITRD=""
 
