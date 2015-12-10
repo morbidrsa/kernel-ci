@@ -36,7 +36,7 @@ while getopts "da:k:i:r:hR:t:" opt; do
 			ARCH=$OPTARG
 			;;
 		d)
-			DEBUG=$OPTARG
+			DEBUG=1
 			;;
 		k)
 			KERNEL=$OPTARG
@@ -78,6 +78,12 @@ if [ x"$INITRD" == "x" ]; then
 	exit 1
 fi
 
+QUIET=quiet
+
+if [ $DEBUG -gt 0 ]; then
+	QUIET=debug
+fi
+
 QEMU_CMD=(
 	"$QEMU$ARCH"
 
@@ -92,7 +98,7 @@ QEMU_CMD=(
 	-smp 2 -m 1024
 
 	# Kernel & initrd
-	-append 'root=${ROOT} ro console=ttyS0 quiet rdinit=/bin/init'
+	-append 'root='${ROOT}' ro console=ttyS0 '${QUIET}' rdinit=/bin/init'
 	-kernel "$KERNEL"
 	-initrd "$INITRD"
 )
