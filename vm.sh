@@ -78,30 +78,26 @@ if [ x"$INITRD" == "x" ]; then
 	exit 1
 fi
 
-QEMU_CMD="$QEMU$ARCH"
+QEMU_CMD=(
+	"$QEMU$ARCH"
 
-QEMU_DEFAULTS="-device virtio-serial-pci,id=virtio-serial0,bus=pci.0,addr=0x4 -device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x6"
-QEMU_HDD="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1 -drive file=${ROOTFS},if=none,id=drive-virtio-disk0 -snapshot"
-QEMU_SERIAL="-serial stdio -monitor none"
-QEMU_BOOT=""
-QEMU_BASE="-nographic -smp 2 -m 1024"
-QEMU_KERNEL=""
-QEMU_INITRD=""
+	# Disk
+	-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1
+	-drive file="${ROOTFS}",if=none,id=drive-virtio-disk0 -snapshot
 
-QEMU_BOOT="-append 'root=${ROOT} ro console=ttyS0 quiet rdinit=/bin/init'"
-QEMU_KERNEL="-kernel $KERNEL"
+	# Serial output
+	-serial stdio -monitor none -nographic
+
+	# CPU & Memory
+	-smp 2 -m 1024
+
+	# Kernel & initrd
+	-append 'root=${ROOT} ro console=ttyS0 quiet rdinit=/bin/init'
+	-kernel "$KERNEL"
+	-initrd "$INITRD"
+)
 pr_debug "Linux kernel to load: $KERNEL"
-
-QEMU_INITRD="-initrd $INITRD"
 pr_debug "Initramfs to load: $INITRD"
 
-CMD=(${QEMU_CMD}		\
-	${QEMU_BASE}		\
-	${QEMU_KERNEL}	\
-	${QEMU_INITRD}	\
-	"${QEMU_BOOT}"		\
-	${QEMU_SERIAL}	\
-	${QEMU_HDD})
-
-pr_debug "$CMD"
-timeout --foreground --kill-after=10 "$TIMEOUT" "${CMD[@]}"
+pr_debug "${QEMU_CMD[@]}"
+timeout --foreground --kill-after=10 "$TIMEOUT" "${QEMU_CMD[@]}"
