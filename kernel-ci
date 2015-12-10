@@ -13,6 +13,7 @@ cleanup()
 {
 	pr_debug "Cleaning up"
 	rm -f $IMAGE
+	rm -f $LOGFILE
 	rm -rf initrd*
 }
 
@@ -32,7 +33,10 @@ MASTER=""
 IMAGE=""
 ROOT=
 ARCH=x86_64
-TIMEOUT=60
+TIMEOUT=180
+LOGFILE=""
+RC=1
+SUCCESS_MARKER="login:"
 
 trap cleanup EXIT
 
@@ -78,10 +82,22 @@ if [ x"$MASTER" == "x" ]; then
 fi
 
 IMAGE=$MASTER.$$
+LOGFILE=kernel-ci.$$.log
 cp ${MASTER} ${IMAGE}
 pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
 ./create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
 ./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} ${DEBUG:+-d} \
-	-k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img -t $TIMEOUT
+	-k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img \
+	-t $TIMEOUT 2>&1 | tee $LOGFILE
+
+if grep -e "$SUCCESS_MARKER" $LOGFILE; then
+	echo "SUCCESS"
+	RC=0
+else
+	echo "FAIL"
+	tail -n 20 $LOGFILE
+fi
+
+exit $RC
