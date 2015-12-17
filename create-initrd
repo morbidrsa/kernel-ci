@@ -102,8 +102,10 @@ if [ -x /usr/bin/busybox-static ]; then
 	ln -s busybox chroot
 	popd
 else
-	for lib in ld-2.22.so ld-linux.so.2; do
-		cp /lib/${lib} lib64/
+	LD_2=`rpm -ql glibc | grep ld-2`
+	LD_LINUX=`rpm -ql glibc | grep ld-linux`
+	for lib in ${LD_2} ${LD_LINUX}; do
+		cp ${lib} lib64/
 	done
 
 	for prog in ${PROGRAMS[@]}; do
