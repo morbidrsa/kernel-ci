@@ -84,11 +84,25 @@ if [ "$DEBUG" == "-d" ]; then
 	QUIET=debug
 fi
 
+
+
+if [ "$ARCH" == "aarch64" ]; then
+	QEMU_EXTRA="-machine virt -cpu host -bios /usr/share/qemu/qemu-uefi-aarch64.bin -enable-kvm"
+	QEMU_DEVICE="-device virtio-blk-pci,scsi=off,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1"
+	CONSOLE="ttyAMA0"
+else
+	QEMU_EXTRA=""
+	QEMU_DEVICE="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1"
+	CONSOLE="ttyS0"
+fi
+
 QEMU_CMD=(
 	"$QEMU$ARCH"
 
+	$QEMU_EXTRA
+
 	# Disk
-	-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1
+	$QEMU_DEVICE
 	-drive file="${ROOTFS}",if=none,id=drive-virtio-disk0 -snapshot
 
 	# Serial output
@@ -98,7 +112,7 @@ QEMU_CMD=(
 	-smp 2 -m 1024
 
 	# Kernel & initrd
-	-append 'root='${ROOT}' ro console=ttyS0 '${QUIET}' rdinit=/bin/init'
+	-append 'root='${ROOT}' ro console=${CONSOLE} "${QUIET}" rdinit=/bin/init'
 	-kernel "$KERNEL"
 	-initrd "$INITRD"
 )
