@@ -36,7 +36,7 @@ while getopts "da:k:i:r:hR:t:" opt; do
 			ARCH=$OPTARG
 			;;
 		d)
-			DEBUG=1
+			DEBUG="-d"
 			;;
 		k)
 			KERNEL=$OPTARG
@@ -80,7 +80,7 @@ fi
 
 QUIET=quiet
 
-if [ $DEBUG -gt 0 ]; then
+if [ "$DEBUG" == "-d" ]; then
 	QUIET=debug
 fi
 
