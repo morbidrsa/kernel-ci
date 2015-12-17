@@ -68,6 +68,15 @@ while getopts "a:dk:i:r:t:h?" opt; do
 	esac
 done
 
+# architecture description of qemu and kernel can be different
+if [ "$ARCH" == "aarch64" ]; then
+	KARCH="arm64"
+	KIMG="Image"
+else
+	KARCH="$ARCH"
+	KIMG="bzImage"
+fi
+
 if [ x"$KERNELDIR" == "x" ]; then
 	pr_err "Kernel directory not set"
 	echo ""
@@ -89,8 +98,8 @@ pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
 ./create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
-./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} $DEBUG \
-	-k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img \
+./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} ${DEBUG} \
+	-k $KERNELDIR/arch/$KARCH/boot/$KIMG -i initrd.img \
 	-t $TIMEOUT 2>&1 | tee $LOGFILE
 if grep -e "$SUCCESS_MARKER" $LOGFILE; then
 	echo "SUCCESS"
