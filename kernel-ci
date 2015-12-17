@@ -50,10 +50,10 @@ while getopts "a:dk:i:r:t:h?" opt; do
 			DEBUG="-d"
 			;;
 		k)
-			KERNELDIR=$OPTARG
+			KERNELDIR=`realpath $OPTARG`
 			;;
 		i)
-			MASTER=$OPTARG
+			MASTER=`realpath $OPTARG`
 			;;
 		r)
 			ROOT=$OPTARG
