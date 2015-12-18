@@ -19,7 +19,7 @@ pr_err()
 
 pr_debug()
 {
-	if [ $DEBUG == 1 ]; then
+	if [ "$DEBUG" == "-d" ]; then
 		echo "[DEBUG] $@"
 	fi
 }

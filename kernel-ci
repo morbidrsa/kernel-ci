@@ -37,6 +37,7 @@ TIMEOUT=180
 LOGFILE=""
 RC=1
 SUCCESS_MARKER="login:"
+DEBUG=""
 
 trap cleanup EXIT
 
@@ -46,13 +47,13 @@ while getopts "a:dk:i:r:t:h?" opt; do
 			ARCH=$OPTARG
 			;;
 		d)
-			DEBUG=1
+			DEBUG="-d"
 			;;
 		k)
-			KERNELDIR=$OPTARG
+			KERNELDIR=`realpath $OPTARG`
 			;;
 		i)
-			MASTER=$OPTARG
+			MASTER=`realpath $OPTARG`
 			;;
 		r)
 			ROOT=$OPTARG
@@ -66,6 +67,15 @@ while getopts "a:dk:i:r:t:h?" opt; do
 			;;
 	esac
 done
+
+# architecture description of qemu and kernel can be different
+if [ "$ARCH" == "aarch64" ]; then
+	KARCH="arm64"
+	KIMG="Image"
+else
+	KARCH="$ARCH"
+	KIMG="bzImage"
+fi
 
 if [ x"$KERNELDIR" == "x" ]; then
 	pr_err "Kernel directory not set"
@@ -88,15 +98,9 @@ pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
 ./create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
-if [ $DEBUG -gt 0 ]; then
-./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} -d \
-	-k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img \
+./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} ${DEBUG} \
+	-k $KERNELDIR/arch/$KARCH/boot/$KIMG -i initrd.img \
 	-t $TIMEOUT 2>&1 | tee $LOGFILE
-else
-./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} \
-	-k $KERNELDIR/arch/x86_64/boot/bzImage -i initrd.img \
-	-t $TIMEOUT 2>&1 | tee $LOGFILE
-fi
 if grep -e "$SUCCESS_MARKER" $LOGFILE; then
 	echo "SUCCESS"
 	RC=0
