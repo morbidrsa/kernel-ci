@@ -112,7 +112,7 @@ QEMU_CMD=(
 	-smp 2 -m 1024
 
 	# Kernel & initrd
-	-append 'root='${ROOT}' ro console=${CONSOLE} "${QUIET}" rdinit=/bin/init'
+	-append 'root='${ROOT}' ro console='${CONSOLE}' '${QUIET}' rdinit=/bin/init'
 	-kernel "$KERNEL"
 	-initrd "$INITRD"
 )
