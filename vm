@@ -67,10 +67,15 @@ if [ x"$KERNEL" == "x" ]; then
 	exit 1
 fi
 
-if [ x"$ROOTFS" == "x" ]; then
-	pr_err "No rootfs option given"
-	usage
-	exit 1
+QEMU_ROOTFS=""
+QEMU_DEVICE=""
+if [ x"$ROOTFS" != "x" ]; then
+	QEMU_ROOTFS="-drive file="${ROOTFS}",if=none,id=drive-virtio-disk0 -snapshot"
+	if [ "$ARCH" == "aarch64" ]; then
+		QEMU_DEVICE="-device virtio-blk-pci,scsi=off,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1"
+	else
+		QEMU_DEVICE="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1"
+	fi
 fi
 
 if [ x"$INITRD" == "x" ]; then
@@ -89,11 +94,9 @@ fi
 
 if [ "$ARCH" == "aarch64" ]; then
 	QEMU_EXTRA="-machine virt -cpu host -bios /usr/share/qemu/qemu-uefi-aarch64.bin -enable-kvm"
-	QEMU_DEVICE="-device virtio-blk-pci,scsi=off,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1"
 	CONSOLE="ttyAMA0"
 else
 	QEMU_EXTRA=""
-	QEMU_DEVICE="-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x5,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1"
 	CONSOLE="ttyS0"
 fi
 
@@ -104,7 +107,7 @@ QEMU_CMD=(
 
 	# Disk
 	$QEMU_DEVICE
-	-drive file="${ROOTFS}",if=none,id=drive-virtio-disk0 -snapshot
+	$QEMU_ROOTFS
 
 	# Serial output
 	-serial stdio -monitor none -nographic
