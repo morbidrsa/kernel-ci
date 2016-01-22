@@ -16,22 +16,24 @@ INITRD=""
 ROOTFS=""
 ROOT="/dev/vda3"
 TIMEOUT=""
+QEMUARGS=""
 
 # TODO Add networking
 
 usage()
 {
 	prog=$(basename $0)
-	echo "$prog [-a arch] [-d] [-r rootfs] [-R root] -k <kernel> -i <initrd>" >&2
+	echo "$prog [-a arch] [-d] [-r rootfs] [-R root] -k <kernel> -i <initrd> [-q qemuargs]" >&2
 	echo "  -a arch         Architecture for QEMU." >&2
 	echo "  -d              Enable debug output." >&2
 	echo "  -r rootfs       Rootfs image to use." >&2
 	echo "  -R root         root= kernel cmdline option" >&2
 	echo "  -k kernel       kernel image to use." >&2
 	echo "  -i initrd       initrd image to use." >&2
+	echo "  -q qemuargs	Extra qemu arguments." >&2
 }
 
-while getopts "da:k:i:r:hR:t:" opt; do
+while getopts "da:k:i:r:hR:t:q:" opt; do
 	case ${opt} in
 		a)
 			ARCH=$OPTARG
@@ -53,6 +55,9 @@ while getopts "da:k:i:r:hR:t:" opt; do
 			;;
 		t)
 			TIMEOUT=$OPTARG
+			;;
+		q)
+			QEMUARGS=$OPTARG
 			;;
 		h)
 			usage
@@ -96,7 +101,7 @@ if [ "$ARCH" == "aarch64" ]; then
 	QEMU_EXTRA="-machine virt -cpu host -bios /usr/share/qemu/qemu-uefi-aarch64.bin -enable-kvm"
 	CONSOLE="ttyAMA0"
 else
-	QEMU_EXTRA=""
+	QEMU_EXTRA="$QEMUARGS"
 	CONSOLE="ttyS0"
 fi
 
