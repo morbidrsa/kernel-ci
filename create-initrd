@@ -25,8 +25,10 @@ copy_libs_for_prog()
 
 usage()
 {
-	echo "Usage: $1 [-k kdir ] [-m '<module[ <module>][...]'] [-r root]" >&2
+	echo "Usage: $1 [-f '<file[ <file>][...]'] [-k kdir ] [-m '<module[ <module>][...]'] [-r root]" >&2
 	echo "" >&2
+	echo "  -f Space separated list of files to include in initrd" >&2
+	echo "     image." >&2
 	echo "  -k Directory having the kernel sources." >&2
 	echo "  -m Space separated list of kernel modules to include" >&2
 	echo "     in initrd image." >&2
@@ -35,8 +37,11 @@ usage()
 }
 
 program=$(basename $0)
-while getopts "k:m:r:?" flag; do
+while getopts "f:k:m:r:?" flag; do
 	case ${flag} in
+		f)
+			FILES=${OPTARG}
+			;;
 		k)
 			KDIR=${OPTARG}
 			;;
@@ -61,7 +66,7 @@ if [ x"$ROOT" == "x" ]; then
 fi
 
 rm -rf initrd
-mkdir -p initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot}
+mkdir -p initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
 pushd initrd
 ln -s bin sbin
 pushd bin
@@ -127,6 +132,12 @@ if [ x"$KDIR" != "x" ]; then
 	fi
 	for mod in ${MODULES}; do
 		find $KDIR -name "${mod}" | xargs cp -t lib/modules/
+	done
+fi
+
+if [ "x$FILES" != "x" ]; then
+	for file in ${FILES}; do
+		cp ${file} root/
 	done
 fi
 
