@@ -7,7 +7,8 @@
 
 set -o nounset
 
-source ./lib.sh
+SRC_ROOT=$(dirname ${BASH_SOURCE[0]})
+source ${SRC_ROOT}/lib.sh
 
 cleanup() 
 {
@@ -96,9 +97,9 @@ LOGFILE=kernel-ci.$$.log
 cp ${MASTER} ${IMAGE}
 pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
-./create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
+${SRC_ROOT}/create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
 pr_debug "Lunching VM"
-./vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} ${DEBUG} \
+${SRC_ROOT}/vm -a ${ARCH} -r ${IMAGE} ${ROOT:+-R $ROOT} ${DEBUG} \
 	-k $KERNELDIR/arch/$KARCH/boot/$KIMG -i initrd.img \
 	-t $TIMEOUT 2>&1 | tee $LOGFILE
 if grep -e "$SUCCESS_MARKER" $LOGFILE; then

@@ -6,7 +6,8 @@
 #
 set -o nounset
 
-source ./lib.sh
+SRC_ROOT=$(dirname ${BASH_SOURCE[0]})
+source ${SRC_ROOT}/lib.sh
 
 QEMU="qemu-system-"
 ARCH="x86_64"
