@@ -9,6 +9,7 @@ DEFPROGRAMS=('sh' 'cat' 'chroot' 'echo' 'insmod' 'mount' 'sleep')
 #MODULES=('efivarfs.ko' 'mcb.ko' 'mcb-pci.ko')
 
 DEFROOT="/dev/vda3"
+O=.
 
 #
 # $1 program
@@ -25,7 +26,7 @@ copy_libs_for_prog()
 
 usage()
 {
-	echo "Usage: $1 [-f '<file[ <file>][...]'] [-i init] [-k kdir ] [-m '<module[ <module>][...]'] [-r root]" >&2
+	echo "Usage: $1 [-f '<file[ <file>][...]'] [-i init] [-k kdir ] [-m '<module[ <module>][...]'] [-o <outdir>] [-r root]" >&2
 	echo "" >&2
 	echo "  -f Space separated list of files to include in initrd" >&2
 	echo "     image." >&2
@@ -35,12 +36,13 @@ usage()
 	echo "     in initrd image." >&2
 	echo "  -p Space separated list of programs to include in" >&2
 	echo "     initrd image." >&2
+	echo "  -o <outdir> generate everything into <outdir>" >&2
 	echo "  -r root= kernel option (default $DEFROOT)."  >&2
 	exit 1
 }
 
 program=$(basename $0)
-while getopts "f:i:k:m:p:r:?" flag; do
+while getopts "f:i:h:k:m:p:o:r:?" flag; do
 	case ${flag} in
 		f)
 			FILES=${OPTARG}
@@ -56,16 +58,20 @@ while getopts "f:i:k:m:p:r:?" flag; do
 			;;
 		p)
 			PROGRAMS=${OPTARG}
+		o)
+			O=${OPTARG}
 			;;
 		r)
 			ROOT=${OPTARG}
 			;;
-		?)
+		[?h])
 			usage ${program}
+			exit 1
 			;;
 		*)
 			echo "invalid option"
 			usage ${program}
+			exit 1
 			;;
 	esac
 done
@@ -78,9 +84,9 @@ if [ x"$PROGRAMS" == "x" ]; then
 	PROGRAMS=$DEFPROGRAMS
 fi
 
-rm -rf initrd
-mkdir -p initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
-pushd initrd
+rm -rf $O/initrd
+mkdir -p $O/initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
+pushd $O/initrd
 ln -s bin sbin
 pushd bin
 popd
@@ -157,9 +163,29 @@ if [ "x$FILES" != "x" ]; then
 		cp ${file} root/
 	done
 fi
+find ./ | cpio -H newc -o > ../initrd.cpio
 
 find ./ | cpio -H newc -o > ../initrd.cpio 2> /dev/null
 popd
 
-gzip -9 -c initrd.cpio > initrd.img
+gzip -9 -c $O/initrd.cpio > $O/initrd.img
+
+add_microcode()
+{
+	find ./ | cpio -H newc -o > $O/microcode.cpio
+	cat $O/microcode.cpio $O/initrd.img > $O/initrd.microcode.img
+}
+
+# microcode
+if [ -d /lib/firmware/amd-ucode ]; then
+	mkdir -p kernel/x86/microcode
+	cat /lib/firmware/amd-ucode/microcode_amd*.bin > kernel/x86/microcode/AuthenticAMD.bin
+	add_microcode
+fi
+
+if [ -d /lib/firmware/intel-ucode ]; then
+	mkdir -p kernel/x86/microcode
+	cat /lib/firmware/intel-ucode/* > kernel/x86/microcode/GenuineIntel.bin
+	add_microcode
+fi
 
