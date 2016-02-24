@@ -95,7 +95,7 @@ LOGFILE=kernel-ci.$$.log
 cp ${MASTER} ${IMAGE}
 pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
-${SRC_ROOT}/create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null
+${SRC_ROOT}/create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" > /dev/null || exit 1
 pr_debug "Lunching VM"
 ${SRC_ROOT}/vm -a ${ARCH} ${IMAGE_OPTS} ${ROOT:+-R $ROOT} ${DEBUG} \
 	-k $KERNELDIR/arch/$KARCH/boot/$KIMG -i initrd.img \
