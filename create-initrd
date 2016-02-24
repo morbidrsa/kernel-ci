@@ -58,6 +58,7 @@ while getopts "f:i:h:k:m:p:o:r:?" flag; do
 			;;
 		p)
 			PROGRAMS=${OPTARG}
+			;;
 		o)
 			O=${OPTARG}
 			;;
