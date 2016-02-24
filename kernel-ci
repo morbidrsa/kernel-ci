@@ -29,7 +29,7 @@ usage()
 }
 
 KERNELDIR=""
-MODULES="virtio.ko virtio_ring.ko virtio_pci.ko virtio_blk.ko raid6_pq.ko xor.ko btrfs.ko"
+MODULES="virtio_pci.ko virtio_blk.ko btrfs.ko"
 MASTER=""
 IMAGE=""
 ROOT=
