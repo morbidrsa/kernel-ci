@@ -163,6 +163,10 @@ if [ x"$KDIR" != "x" ]; then
 			continue
 		fi
 		file=$(find $KDIR -name "$mod")
+		if test -z "$file"; then
+			echo "warning: module $mod not found"
+			continue
+		fi
 		cp "$file" "lib/modules/$krel"
 		for dep in $(/sbin/modinfo -F depends "$file" | sed 's/,/ /g'); do
 			set -- "$@" "$dep.ko"
