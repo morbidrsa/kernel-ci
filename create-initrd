@@ -9,7 +9,7 @@ DEFPROGRAMS=('sh' 'cat' 'chroot' 'echo' 'insmod' 'mount' 'sleep')
 #MODULES=('efivarfs.ko' 'mcb.ko' 'mcb-pci.ko')
 
 DEFROOT="/dev/vda3"
-O=.
+O=$(pwd)
 
 #
 # $1 program
@@ -87,10 +87,8 @@ fi
 
 rm -rf $O/initrd
 mkdir -p $O/initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
-pushd $O/initrd
+pushd $O/initrd >/dev/null
 ln -s bin sbin
-pushd bin
-popd
 
 if [ x"$INIT_SRC" == "x" ]; then
 	echo "#!/bin/sh" >> bin/init
@@ -123,13 +121,9 @@ chmod 755 bin/init
 
 if [ -x /usr/bin/busybox-static ]; then
 	cp /usr/bin/busybox-static bin/busybox
-	pushd bin
-	ln -s busybox sh
-	ln -s busybox insmod
-	ln -s busybox mount
-	ln -s busybox echo
-	ln -s busybox chroot
-	popd
+	for prog in sh insmod mount echo chroot; do
+		ln -s busybox "bin/$prog"
+	done
 else
 	LD_2=`rpm -ql glibc | grep ld-2`
 	LD_LINUX=`rpm -ql glibc | grep ld-linux`
@@ -164,29 +158,34 @@ if [ "x$FILES" != "x" ]; then
 		cp ${file} root/
 	done
 fi
-find ./ | cpio -H newc -o > ../initrd.cpio
 
-find ./ | cpio -H newc -o > ../initrd.cpio 2> /dev/null
-popd
+find ./ | cpio --quiet -H newc -o > ../initrd.cpio
+popd >/dev/null
 
 gzip -9 -c $O/initrd.cpio > $O/initrd.img
 
-add_microcode()
-{
-	find ./ | cpio -H newc -o > $O/microcode.cpio
-	cat $O/microcode.cpio $O/initrd.img > $O/initrd.microcode.img
-}
+if [[ ! -d /lib/firmware/amd-ucode && ! -d /lib/firmware/intel-ucode ]]; then
+	exit 0
+fi
 
 # microcode
+TMPDIR=$(mktemp -qd)
+UCODE_DIR=$TMPDIR/kernel/x86/microcode
+
+mkdir -p $UCODE_DIR
+
 if [ -d /lib/firmware/amd-ucode ]; then
-	mkdir -p kernel/x86/microcode
-	cat /lib/firmware/amd-ucode/microcode_amd*.bin > kernel/x86/microcode/AuthenticAMD.bin
-	add_microcode
+	cat /lib/firmware/amd-ucode/microcode_amd*.bin > $UCODE_DIR/AuthenticAMD.bin
 fi
 
 if [ -d /lib/firmware/intel-ucode ]; then
-	mkdir -p kernel/x86/microcode
-	cat /lib/firmware/intel-ucode/* > kernel/x86/microcode/GenuineIntel.bin
-	add_microcode
+	cat /lib/firmware/intel-ucode/* > $UCODE_DIR/GenuineIntel.bin
 fi
 
+cd $TMPDIR
+find . | cpio --quiet -H newc -o > $O/microcode.cpio
+cat $O/microcode.cpio $O/initrd.img > $O/initrd.microcode.img
+mv -f $O/initrd.microcode.img $O/initrd.img
+
+rm -rf $O/microcode.cpio
+rm -rf $TMPDIR
