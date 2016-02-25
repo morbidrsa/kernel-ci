@@ -29,7 +29,16 @@ usage()
 }
 
 KERNELDIR=""
-MODULES="virtio_pci.ko virtio_blk.ko btrfs.ko"
+MODULES=(
+	# storage
+	virtio_pci.ko virtio_blk.ko sg.ko ahci.ko ata_piix.ko iscsi_ibft.ko
+	loop.ko cdrom.ko
+	# /, /boot and autofs4 needed by systemd
+	btrfs.ko autofs4.ko vfat.ko nls_cp437.ko nls_iso8859_1.ko
+	# network devices
+	8139cp.ko 8139too.ko virtio_net.ko
+	af_packet.ko serio_raw.ko
+)
 MASTER=""
 IMAGE=""
 ROOT=
@@ -95,7 +104,7 @@ LOGFILE=kernel-ci.$$.log
 cp ${MASTER} ${IMAGE}
 pr_debug "Using JeOS image ${IMAGE}"
 pr_debug "Creating initrd"
-${SRC_ROOT}/create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "$MODULES" || exit 1
+${SRC_ROOT}/create-initrd -k ${KERNELDIR} ${ROOT:+-r $ROOT} -m "${MODULES[*]}" || exit 1
 pr_debug "Lunching VM"
 ${SRC_ROOT}/vm -a ${ARCH} ${IMAGE_OPTS} ${ROOT:+-R $ROOT} ${DEBUG} \
 	-k $KERNELDIR/arch/$KARCH/boot/$KIMG -i initrd.img \
