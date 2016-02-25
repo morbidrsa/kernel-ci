@@ -5,7 +5,7 @@
 # This file is part of the kernel-ci project and licensed under the GNU GPLv2
 #
 
-DEFPROGRAMS=(sh cp mkdir cat chroot echo insmod modprobe mount sleep)
+DEFPROGRAMS=(sh cp rm mkdir cat chroot echo insmod modprobe mount sleep)
 #MODULES=('efivarfs.ko' 'mcb.ko' 'mcb-pci.ko')
 
 DEFROOT="/dev/vda3"
@@ -113,6 +113,8 @@ mount $ROOT /sysroot
 echo "Copying kernel modules to new root"
 mkdir /sysroot/lib/modules/$krel
 cp /lib/modules/$krel/* /sysroot/lib/modules/$krel/
+# Disable the JeOS wizard
+rm -f /sysroot/usr/lib/systemd/system/sysinit.target.wants/jeos-firstboot.service
 echo "Switching to new root"
 cd /sysroot
 exec chroot . sh -c 'exec /sbin/init'
