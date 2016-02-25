@@ -5,7 +5,7 @@
 # This file is part of the kernel-ci project and licensed under the GNU GPLv2
 #
 
-DEFPROGRAMS=('sh' 'cat' 'chroot' 'echo' 'insmod' 'mount' 'sleep')
+DEFPROGRAMS=(sh cp rm mkdir cat chroot echo insmod modprobe mount sleep)
 #MODULES=('efivarfs.ko' 'mcb.ko' 'mcb-pci.ko')
 
 DEFROOT="/dev/vda3"
@@ -54,10 +54,10 @@ while getopts "f:i:h:k:m:p:o:r:?" flag; do
 			KDIR=${OPTARG}
 			;;
 		m)
-			MODULES=${OPTARG}
+			MODULES=(${OPTARG})
 			;;
 		p)
-			PROGRAMS=${OPTARG}
+			PROGRAMS=(${OPTARG})
 			;;
 		o)
 			O=${OPTARG}
@@ -82,20 +82,22 @@ if [ x"$ROOT" == "x" ]; then
 fi
 
 if [ x"$PROGRAMS" == "x" ]; then
-	PROGRAMS=$DEFPROGRAMS
+	PROGRAMS=("${DEFPROGRAMS[@]}")
 fi
 
-rm -rf $O/initrd
-mkdir -p $O/initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
-pushd $O/initrd >/dev/null
+krel=$(make -s -C "$KDIR" kernelrelease)
+O=$(cd "$O"; pwd)
+TMPDIR=$(mktemp -qd)
+mkdir -p $TMPDIR/initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
+pushd $TMPDIR/initrd >/dev/null
 ln -s bin sbin
 
 if [ x"$INIT_SRC" == "x" ]; then
 	echo "#!/bin/sh" >> bin/init
 
-	for mod in ${MODULES}; do
+	for mod in "${MODULES[@]}"; do
 		echo "echo \"Loading ${mod}\"" >> bin/init
-		echo "insmod /lib/modules/${mod}" >> bin/init
+		echo "modprobe ${mod%.ko}" >> bin/init
 	done
 
 	cat >> bin/init << __EOF__
@@ -106,8 +108,13 @@ mount -t sysfs /sys /sys
 mount -t devtmpfs /dev /dev
 
 # Mount rootfs to /sysroot
-mount -o ro $ROOT /sysroot
+mount $ROOT /sysroot
 
+echo "Copying kernel modules to new root"
+mkdir /sysroot/lib/modules/$krel
+cp /lib/modules/$krel/* /sysroot/lib/modules/$krel/
+# Disable the JeOS wizard
+rm -f /sysroot/usr/lib/systemd/system/sysinit.target.wants/jeos-firstboot.service
 echo "Switching to new root"
 cd /sysroot
 exec chroot . sh -c 'exec /sbin/init'
@@ -121,7 +128,7 @@ chmod 755 bin/init
 
 if [ -x /usr/bin/busybox-static ]; then
 	cp /usr/bin/busybox-static bin/busybox
-	for prog in sh insmod mount echo chroot; do
+	for prog in "${PROGRAMS[@]}"; do
 		ln -s busybox "bin/$prog"
 	done
 else
@@ -148,9 +155,29 @@ if [ x"$KDIR" != "x" ]; then
 	if [ $LINK -eq 0 ]; then
 		KDIR="$KDIR/"
 	fi
-	for mod in ${MODULES}; do
-		find $KDIR -name "${mod}" | xargs cp -t lib/modules/
+	mkdir -p "lib/modules/$krel"
+	cp "$KDIR/modules.order" "$KDIR/modules.builtin" "lib/modules/$krel" 2>/dev/null
+	set -- "${MODULES[@]}"
+	while test $# -gt 0; do
+		# This is not a noop: it replaces [-_] with a literal [-_] to
+		# use with find(1), because module names use - and _
+		# interchangeably
+		mod=${1//[-_]/[-_]}
+		shift
+		if find "lib/modules/$krel" -name "$mod" | grep -q .; then
+			continue
+		fi
+		file=$(find $KDIR -name "$mod")
+		if test -z "$file"; then
+			echo "warning: module $mod not found"
+			continue
+		fi
+		cp "$file" "lib/modules/$krel"
+		for dep in $(/sbin/modinfo -F depends "$file" | sed 's/,/ /g'); do
+			set -- "$@" "$dep.ko"
+		done
 	done
+	/sbin/depmod -F "$KDIR/System.map" -e -b "$PWD" "$krel"
 fi
 
 if [ "x$FILES" != "x" ]; then
@@ -159,17 +186,17 @@ if [ "x$FILES" != "x" ]; then
 	done
 fi
 
-find ./ | cpio --quiet -H newc -o > ../initrd.cpio
+find ./ | cpio --quiet -H newc -o > $O/initrd.cpio
 popd >/dev/null
 
 gzip -9 -c $O/initrd.cpio > $O/initrd.img
 
 if [[ ! -d /lib/firmware/amd-ucode && ! -d /lib/firmware/intel-ucode ]]; then
+	rm -rf $TMPDIR
 	exit 0
 fi
 
 # microcode
-TMPDIR=$(mktemp -qd)
 UCODE_DIR=$TMPDIR/kernel/x86/microcode
 
 mkdir -p $UCODE_DIR

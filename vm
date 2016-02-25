@@ -129,4 +129,8 @@ pr_debug "Linux kernel to load: $KERNEL"
 pr_debug "Initramfs to load: $INITRD"
 
 pr_debug "${QEMU_CMD[@]}"
-timeout --foreground --kill-after=10 "$TIMEOUT" "${QEMU_CMD[@]}"
+if test -z "$TIMEOUT" || test "$TIMEOUT" -eq 0; then
+	"${QEMU_CMD[@]}"
+else
+	timeout --foreground --kill-after=10 "$TIMEOUT" "${QEMU_CMD[@]}"
+fi
