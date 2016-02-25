@@ -5,7 +5,7 @@
 # This file is part of the kernel-ci project and licensed under the GNU GPLv2
 #
 
-DEFPROGRAMS=('sh' 'cat' 'chroot' 'echo' 'insmod' 'modprobe' 'mount' 'sleep')
+DEFPROGRAMS=(sh cp mkdir cat chroot echo insmod modprobe mount sleep)
 #MODULES=('efivarfs.ko' 'mcb.ko' 'mcb-pci.ko')
 
 DEFROOT="/dev/vda3"
@@ -85,6 +85,7 @@ if [ x"$PROGRAMS" == "x" ]; then
 	PROGRAMS=("${DEFPROGRAMS[@]}")
 fi
 
+krel=$(make -s -C "$KDIR" kernelrelease)
 O=$(cd "$O"; pwd)
 TMPDIR=$(mktemp -qd)
 mkdir -p $TMPDIR/initrd/{bin,dev,etc,lib/modules,lib64,proc,sys,sysroot,root}
@@ -107,8 +108,11 @@ mount -t sysfs /sys /sys
 mount -t devtmpfs /dev /dev
 
 # Mount rootfs to /sysroot
-mount -o ro $ROOT /sysroot
+mount $ROOT /sysroot
 
+echo "Copying kernel modules to new root"
+mkdir /sysroot/lib/modules/$krel
+cp /lib/modules/$krel/* /sysroot/lib/modules/$krel/
 echo "Switching to new root"
 cd /sysroot
 exec chroot . sh -c 'exec /sbin/init'
@@ -149,7 +153,6 @@ if [ x"$KDIR" != "x" ]; then
 	if [ $LINK -eq 0 ]; then
 		KDIR="$KDIR/"
 	fi
-	krel=$(make -s -C "$KDIR" kernelrelease)
 	mkdir -p "lib/modules/$krel"
 	cp "$KDIR/modules.order" "$KDIR/modules.builtin" "lib/modules/$krel" 2>/dev/null
 	set -- "${MODULES[@]}"
