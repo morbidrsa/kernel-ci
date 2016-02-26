@@ -85,6 +85,11 @@ if [ x"$PROGRAMS" == "x" ]; then
 	PROGRAMS=("${DEFPROGRAMS[@]}")
 fi
 
+# set to CWD in case we're called in the kernel build dir
+if [ x"$KDIR" == "x" ]; then
+	KDIR=$(pwd)
+fi
+
 krel=$(make -s -C "$KDIR" kernelrelease)
 O=$(cd "$O"; pwd)
 TMPDIR=$(mktemp -qd)
@@ -141,7 +146,11 @@ else
 	for prog in ${PROGRAMS[@]}; do
 		absprog=$(which ${prog})
 		if [ -z ${absprog} ]; then
-			echo "${prog} not found, skipping.."
+			if [ ! -f /sbin/${prog} ]; then
+				echo "${prog} not found, skipping.."
+			else
+				absprog=/sbin/${prog}
+			fi
 			continue
 		fi
 		cp ${absprog} bin/
@@ -150,7 +159,7 @@ else
 fi
 
 if [ x"$KDIR" != "x" ]; then
-	readlink $KDIR
+	readlink $KDIR > /dev/null
 	LINK=$?
 	if [ $LINK -eq 0 ]; then
 		KDIR="$KDIR/"
