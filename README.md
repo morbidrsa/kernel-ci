@@ -10,7 +10,7 @@ The kernel-ci project consists of a set of shell scripts
 which are used to boot-test (and probably run additional tests) a freshly
 built kernel in a sealed environment.
 
-The scripts have beek created as part of the kernel-ci project of SUSE's
+The scripts have been created as part of the kernel-ci project of SUSE's
 Hackweek Number 13.
 
 ## kernel-ci
@@ -57,8 +57,8 @@ eventual disk writes or misbehaving drivers won't corrupt it and pass the
 kernel, initrd and the copy of the rootfs to **vm** which spawns qemu to
 boot the kernel.
 
-It is usefull to not only do a bare bone boot of the kernel (which is good for
+It is useful to not only do a bare bone boot of the kernel (which is good for
 basic smoke testing) but run a set of tests (for example the xfstests test
-suite) as well after boot. In order to achive this your rootfs image should
-contain a systemd service or initscript to lunch the tests after successfull
+suite) as well after boot. In order to achieve this your rootfs image should
+contain a systemd service or initscript to launch the tests after successful
 bootup.
