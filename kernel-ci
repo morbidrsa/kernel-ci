@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2015 SUSE Linux GmbH
 #
@@ -10,7 +10,7 @@ set -o nounset
 SRC_ROOT=$(dirname ${BASH_SOURCE[0]})
 source ${SRC_ROOT}/lib.sh
 
-cleanup() 
+cleanup()
 {
 	pr_debug "Cleaning up"
 	rm -f $IMAGE
@@ -21,10 +21,10 @@ cleanup()
 usage()
 {
 	echo "$(basename $0) [-d] [-a ARCH] -k <kerneldir> -i <master-image> [-r <root>]" >&2
-	echo "  -a	Set QEMU architecture (default: x86_64)." >&2
-	echo "  -d	Enable debug output." >&2
-	echo "  -k	Directory from where to use the kernel." >&2
-	echo "  -i	HDD image to use." >&2
+	echo "  -a      Set QEMU architecture (default: x86_64)." >&2
+	echo "  -d      Enable debug output." >&2
+	echo "  -k      Directory from where to use the kernel." >&2
+	echo "  -i      HDD image to use." >&2
 	echo "  -r      root partition name." >&2
 }
 
