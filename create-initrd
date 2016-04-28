@@ -176,14 +176,14 @@ if [ x"$KDIR" != "x" ]; then
 		if find "lib/modules/$krel" -name "$mod" | grep -q .; then
 			continue
 		fi
-		file=$(find $KDIR -name "$mod")
+		file=$(find $KDIR -name "$mod*.ko")
 		if test -z "$file"; then
 			echo "warning: module $mod not found"
 			continue
 		fi
 		cp "$file" "lib/modules/$krel"
 		for dep in $(/sbin/modinfo -F depends "$file" | sed 's/,/ /g'); do
-			set -- "$@" "$dep.ko"
+			set -- "$@" "$dep"
 		done
 	done
 	/sbin/depmod -F "$KDIR/System.map" -e -b "$PWD" "$krel"
