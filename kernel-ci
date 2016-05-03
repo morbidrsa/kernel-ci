@@ -31,13 +31,13 @@ usage()
 KERNELDIR=""
 MODULES=(
 	# storage
-	virtio_pci.ko virtio_blk.ko sg.ko ahci.ko ata_piix.ko iscsi_ibft.ko
-	loop.ko cdrom.ko
+	virtio_pci virtio_blk sg ahci ata_piix iscsi_ibft
+	loop cdrom
 	# /, /boot and autofs4 needed by systemd
-	btrfs.ko autofs4.ko vfat.ko nls_cp437.ko nls_iso8859_1.ko
+	btrfs autofs4 vfat nls_cp437 nls_iso8859_1
 	# network devices
-	8139cp.ko 8139too.ko virtio_net.ko
-	af_packet.ko serio_raw.ko
+	8139cp 8139too virtio_net
+	af_packet serio_raw
 )
 MASTER=""
 IMAGE=""
