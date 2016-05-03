@@ -181,7 +181,9 @@ if [ x"$KDIR" != "x" ]; then
 			echo "warning: module $mod not found"
 			continue
 		fi
-		cp "$file" "lib/modules/$krel"
+		for f in "${file[@]}"; do
+			cp "$f" "lib/modules/$krel"
+		done
 		for dep in $(/sbin/modinfo -F depends "$file" | sed 's/,/ /g'); do
 			set -- "$@" "$dep"
 		done
