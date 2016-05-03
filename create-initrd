@@ -159,11 +159,7 @@ else
 fi
 
 if [ x"$KDIR" != "x" ]; then
-	readlink $KDIR > /dev/null
-	LINK=$?
-	if [ $LINK -eq 0 ]; then
-		KDIR="$KDIR/"
-	fi
+	KDIR=$(realpath $KDIR)
 	mkdir -p "lib/modules/$krel"
 	cp "$KDIR/modules.order" "$KDIR/modules.builtin" "lib/modules/$krel" 2>/dev/null
 	set -- "${MODULES[@]}"
