@@ -176,7 +176,7 @@ if [ x"$KDIR" != "x" ]; then
 		if find "lib/modules/$krel" -name "$mod" | grep -q .; then
 			continue
 		fi
-		file=$(find $KDIR -name "$mod*.ko")
+		file=$(find $KDIR -name "$mod.ko")
 		if test -z "$file"; then
 			echo "warning: module $mod not found"
 			continue
