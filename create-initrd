@@ -197,6 +197,7 @@ find ./ | cpio --quiet -H newc -o > $O/initrd.cpio
 popd >/dev/null
 
 gzip -9 -c $O/initrd.cpio > $O/initrd.img
+rm -rf $O/initrd.cpio
 
 if [[ ! -d /lib/firmware/amd-ucode && ! -d /lib/firmware/intel-ucode ]]; then
 	rm -rf $TMPDIR
